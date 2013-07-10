@@ -19,6 +19,7 @@ public class ByteBufferSeekableByteChannel implements SeekableByteChannel {
     public ByteBufferSeekableByteChannel(ByteBuffer backing) {
         this.backing = backing;
         this.open = true;
+        this.maxPos = backing.limit();
     }
 
     public boolean isOpen() {
@@ -30,6 +31,10 @@ public class ByteBufferSeekableByteChannel implements SeekableByteChannel {
     }
 
     public int read(ByteBuffer dst) throws IOException {
+        if (!backing.hasRemaining()) {
+            return -1;
+        }
+
         int toRead = Math.min(backing.remaining(), dst.remaining());
         dst.put(NIOUtils.read(backing, toRead));
         maxPos = Math.max(maxPos, backing.position());
